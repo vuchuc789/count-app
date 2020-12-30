@@ -8,12 +8,6 @@ const UserSchema = Schema(
       required: true,
       trim: true,
     },
-    timekeepers: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Timekeeper",
-      },
-    ],
   },
   { timestamps: true }
 );

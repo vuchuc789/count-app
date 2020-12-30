@@ -1,28 +1,21 @@
 const express = require("express");
 const cors = require("cors");
-const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
+const { connectToDatabase } = require("./helpers/database");
 
 require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT;
 const mongoURI = process.env.MONGODB_URI;
+const cookieSecret = process.env.COOKIE_SECRET || "secret";
+
+connectToDatabase(mongoURI);
 
 app.use(cors());
-
-mongoose
-  .connect(mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
-  })
-  .then(() => {
-    console.log("MongoDB connected !!");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+app.use(bodyParser.json());
+app.use(cookieParser(cookieSecret));
 
 app.use("/api", require("./routes/api"));
 
