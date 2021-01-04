@@ -10,6 +10,18 @@ exports.register = async (req, res) => {
       return;
     }
 
+    if (req.signedCookies.userId) {
+      const user = await User.findById(
+        req.signedCookies.userId,
+        "_id nickname"
+      );
+
+      if (user) {
+        res.json(user);
+        return;
+      }
+    }
+
     const user = new User({
       nickname: req.body.nickname,
     });
