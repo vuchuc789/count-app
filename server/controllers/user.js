@@ -1,7 +1,5 @@
+const cookieOption = require("../helpers/cookieOption");
 const User = require("../models/User");
-
-const threeYearsToMillisecond = 3 * 365 * 24 * 60 * 60 * 1000;
-const isSSL = process.env.NODE_ENV === "production";
 
 exports.register = async (req, res) => {
   try {
@@ -27,17 +25,10 @@ exports.register = async (req, res) => {
     });
 
     const doc = await user.save();
-    res
-      .cookie("userId", doc._id, {
-        maxAge: threeYearsToMillisecond,
-        httpOnly: true,
-        secure: isSSL,
-        signed: true,
-      })
-      .json({
-        _id: doc._id,
-        nickname: doc.nickname,
-      });
+    res.cookie("userId", doc._id, cookieOption).json({
+      _id: doc._id,
+      nickname: doc.nickname,
+    });
   } catch (error) {
     res.json({ error: "Something went wrong" });
     console.error(error);
@@ -57,14 +48,7 @@ exports.signIn = async (req, res) => {
       return;
     }
 
-    res
-      .cookie("userId", user._id, {
-        maxAge: threeYearsToMillisecond,
-        httpOnly: true,
-        secure: isSSL,
-        signed: true,
-      })
-      .json(user);
+    res.cookie("userId", user._id, cookieOption).json(user);
   } catch (error) {
     res.json({ error: "Something went wrong" });
   }
