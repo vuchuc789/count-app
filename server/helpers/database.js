@@ -8,7 +8,6 @@ exports.connectToDatabase = async (mongoURI) => {
       useFindAndModify: false,
       useCreateIndex: true,
     });
-
     console.log("MongoDB connected !!");
   } catch (err) {
     console.log(err);
