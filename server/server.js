@@ -10,10 +10,16 @@ const app = express();
 const port = process.env.PORT;
 const mongoURI = process.env.MONGODB_URI;
 const cookieSecret = process.env.COOKIE_SECRET || "secret";
+const corsOptions = {
+  origin: true,
+  credentials: true,
+  maxAge: 3600,
+  optionsSuccessStatus: true,
+};
 
 connectToDatabase(mongoURI);
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(cookieParser(cookieSecret));
 
