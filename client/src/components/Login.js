@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import '../styles/Login.css';
 import userActions from '../actions/userActions';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
 const Input = ({ data, focused, setFocus, setContent }) => {
   const [value, setValue] = useState('');
-
-  const { id, placeholder } = data;
+  const { id, placeholder, label, action } = data;
+  const dispatch = useDispatch();
 
   const onFocus = (e) => {
     setFocus(e.target.id);
@@ -21,25 +20,41 @@ const Input = ({ data, focused, setFocus, setContent }) => {
     }
   };
 
+  const onEnter = (e) => {
+    if (e.key === 'Enter') {
+      dispatch(action(value));
+    }
+  };
+
   useEffect(() => {
     setValue('');
   }, [focused]);
 
   return (
-    <input
-      id={id}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      onFocus={onFocus}
-    />
+    <div className="fl login-input">
+      <label className="login-label no-select" htmlFor={id}>
+        {label}
+      </label>
+      <input
+        id={id}
+        className="login-field"
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        onFocus={onFocus}
+        autoComplete="off"
+        onKeyPress={onEnter}
+      />
+    </div>
   );
 };
 
 Input.propTypes = {
   data: PropTypes.shape({
     id: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
     placeholder: PropTypes.string.isRequired,
+    action: PropTypes.func.isRequired,
   }).isRequired,
   focused: PropTypes.bool.isRequired,
   setFocus: PropTypes.func.isRequired,
@@ -50,18 +65,21 @@ const Login = () => {
   const [focusedInputId, setFocusedInputId] = useState('');
   const [focusedInputContent, setFocusedInputContent] = useState('');
   const userError = useSelector((state) => state.user.error);
+  const userLoading = useSelector((state) => state.user.loading);
   const dispatch = useDispatch();
 
   const dataInputFields = useMemo(
     () => [
       {
         id: 'nickname',
-        placeholder: 'Your nickname...',
+        label: 'Nickname',
+        placeholder: 'teobeobeo',
         action: userActions.register,
       },
       {
         id: 'userId',
-        placeholder: 'Your exist id...',
+        label: 'User ID',
+        placeholder: 'an existed id',
         action: userActions.login,
       },
     ],
@@ -92,7 +110,7 @@ const Login = () => {
     if (userError) {
       const clearError = setTimeout(() => {
         dispatch(userActions.clearError());
-      }, 3000);
+      }, 2000);
 
       return () => {
         clearTimeout(clearError);
@@ -101,11 +119,23 @@ const Login = () => {
   }, [userError]);
 
   return (
-    <>
-      {userError && <p>{userError}</p>}
-      {inputFields}
-      <button onClick={onStart}>Start 🔥🔥🔥</button>
-    </>
+    <div className="login-container fl fl-jc-ct fl-ai-ct">
+      <div className="login-inside-container fl fl-jc-ct fl-ai-ct">
+        <h2 className="no-select">Hi, this is my countdown app</h2>
+        {userError && <p className="login-error no-select">{userError}</p>}
+        {inputFields}
+        <div className="login-button no-select" onClick={onStart}>
+          Start 🔥
+        </div>
+      </div>
+      <div
+        className={`login-overlay${
+          userLoading ? '' : ' login-overlay-invisible'
+        }`}
+      >
+        <div className="login-spinner"></div>
+      </div>
+    </div>
   );
 };
 

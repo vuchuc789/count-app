@@ -4,7 +4,6 @@ import {
   Route,
   Redirect,
 } from 'react-router-dom';
-import '../styles/App.css';
 import Login from './Login';
 import Dashboard from './Dashboard';
 import NewTimekeeper from './NewTimekeeper';
