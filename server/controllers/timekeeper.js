@@ -1,6 +1,7 @@
 const Timekeeper = require("../models/Timekeeper");
 
 const fiveMinutesToMilliseconds = 5 * 60 * 1000;
+const maximumTimekeeperQuantity = 6;
 
 exports.createTimekeeper = async (req, res) => {
   try {
@@ -24,6 +25,14 @@ exports.createTimekeeper = async (req, res) => {
     const date = new Date(timestamp);
     if (isNaN(date.getTime())) {
       res.json({ error: "Timestamp is invalid" });
+      return;
+    }
+
+    const quantity = await Timekeeper.countDocuments({
+      userId: req.signedCookies.userId,
+    });
+    if (quantity >= maximumTimekeeperQuantity) {
+      res.json({ error: "Too many timekeepers are created" });
       return;
     }
 
@@ -51,12 +60,12 @@ exports.getAllTimekeepers = async (req, res) => {
   try {
     const timekeepers = await Timekeeper.find({
       userId: req.signedCookies.userId,
-    });
+    }).select("title message timestamp");
 
     res.json(timekeepers);
   } catch (error) {
     res.json({ error: "Something went wrong" });
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -134,14 +143,14 @@ exports.deleteTimekeeper = async (req, res) => {
       return;
     }
 
-    if (req.signedCookies.userId !== timekeeper.userId) {
+    if (req.signedCookies.userId !== timekeeper.userId.toString()) {
       res.json({ error: "Delete failed" });
       return;
     }
 
     await timekeeper.remove();
 
-    res.json({ status: "success" });
+    res.json({ _id: req.params.id });
   } catch (error) {
     res.json({
       error: "Something went wrong",

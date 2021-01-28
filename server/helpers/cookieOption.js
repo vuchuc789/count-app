@@ -6,7 +6,7 @@ const cookieOption = {
   httpOnly: true,
   secure: isSSL,
   signed: true,
-  sameSite: "None",
+  sameSite: isSSL ? "None" : "Strict",
 };
 
 module.exports = cookieOption;

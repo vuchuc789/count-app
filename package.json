@@ -6,14 +6,13 @@
   "scripts": {
     "db-start": "docker-compose -f mongodb.yml up -d",
     "db-stop": "docker-compose -f mongodb.yml down",
+    "sudo-db-start": "sudo docker-compose -f mongodb.yml up -d",
+    "sudo-db-stop": "sudo docker-compose -f mongodb.yml down",
     "dev": "concurrently \"npm --prefix ./server/ run dev\" \"PORT=3002 npm --prefix ./client/ start\""
   },
   "author": "Vu Chuc",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^5.3.0"
-  },
-  "dependencies": {
-    "prop-types": "^15.7.2"
+    "concurrently": "^6.0.0"
   }
 }

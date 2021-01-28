@@ -6,12 +6,12 @@ import {
 } from 'react-router-dom';
 import Login from './Login';
 import Dashboard from './Dashboard';
-import NewTimekeeper from './NewTimekeeper';
 import Timekeeper from './Timekeeper';
 import NotFound from './NotFound';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import userActions from '../actions/userActions';
+import timekeeperActions from '../actions/timekeeperActions';
 
 const App = () => {
   const userId = useSelector((state) => state.user.userId);
@@ -21,6 +21,12 @@ const App = () => {
     dispatch(userActions.loginAgain());
   }, []);
 
+  useEffect(() => {
+    if (userId) {
+      dispatch(timekeeperActions.getAll());
+    }
+  }, [userId]);
+
   return (
     <Router>
       <Switch>
@@ -29,9 +35,6 @@ const App = () => {
         </Route>
         <Route path="/dashboard">
           {userId ? <Dashboard /> : <Redirect to="/" />}
-        </Route>
-        <Route path="/new">
-          {userId ? <NewTimekeeper /> : <Redirect to="/" />}
         </Route>
         <Route path="/timekeeper/:id" component={Timekeeper} />
         <Route component={NotFound} />

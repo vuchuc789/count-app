@@ -1,13 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700&family=Potta+One&display=swap');
 
 @import './helpers/variables';
-@import './helpers/globals';
 @import './helpers/mixins';
+@import './helpers/globals';
 
 // pages
-@import './components/app';
 @import './components/dashboard';
 @import './components/login';
-@import './components/newTimekeeper';
 @import './components/notFound';
 @import './components/timekeeper';

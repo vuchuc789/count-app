@@ -3,7 +3,8 @@ import userActions from '../actions/userActions';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
-const Input = ({ data, focused, setFocus, setContent }) => {
+const Input = (props) => {
+  const { data, focused, setFocus, setContent } = props;
   const [value, setValue] = useState('');
   const { id, placeholder, label, action } = data;
   const dispatch = useDispatch();
@@ -50,7 +51,7 @@ const Input = ({ data, focused, setFocus, setContent }) => {
 };
 
 Input.propTypes = {
-  data: PropTypes.shape({
+  data: PropTypes.exact({
     id: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
     placeholder: PropTypes.string.isRequired,
@@ -98,7 +99,7 @@ const Login = () => {
     );
   });
 
-  const onStart = (e) => {
+  const onStart = () => {
     const obj = dataInputFields.find((obj) => obj.id === focusedInputId);
 
     if (obj) {
@@ -119,21 +120,21 @@ const Login = () => {
   }, [userError]);
 
   return (
-    <div className="login-container fl fl-jc-ct fl-ai-ct">
-      <div className="login-inside-container fl fl-jc-ct fl-ai-ct">
-        <h2 className="no-select">Hi, this is my countdown app</h2>
-        {userError && <p className="login-error no-select">{userError}</p>}
+    <div className="main-container fl fl-jc-ct fl-ai-ct">
+      <div className="main-inside-container fl fl-jc-ct fl-ai-ct fl-di-co">
+        <h2 className="login-header no-select">Hi, this is my countdown app</h2>
+        {userError && <p className="err-notification no-select">{userError}</p>}
         {inputFields}
         <div className="login-button no-select" onClick={onStart}>
           Start 🔥
         </div>
       </div>
       <div
-        className={`login-overlay${
-          userLoading ? '' : ' login-overlay-invisible'
+        className={`spinner-background${
+          userLoading ? '' : 'spinner-invisible'
         }`}
       >
-        <div className="login-spinner"></div>
+        <div className="spinner"></div>
       </div>
     </div>
   );

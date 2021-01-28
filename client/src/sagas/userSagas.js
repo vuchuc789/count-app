@@ -1,5 +1,5 @@
 import { call, put, select, takeEvery } from 'redux-saga/effects';
-import api from '../apis';
+import api from '../api';
 import { REGISTER, LOGIN, LOGIN_AGAIN } from '../actions/actionTypes';
 import userActions from '../actions/userActions';
 
@@ -10,10 +10,30 @@ function* registerAndLogin(action) {
     if (!loading) {
       yield put(userActions.requested());
 
-      const response =
-        action.type === REGISTER
-          ? yield call(api.user.register, action.payload.nickname)
-          : yield call(api.user.login, action.payload.userId);
+      let response = {};
+      switch (action.type) {
+        case REGISTER:
+          if (!action.payload.nickname) {
+            yield put(userActions.requestFailure('Nickname is required'));
+            return;
+          }
+
+          response = yield call(api.user.register, action.payload.nickname);
+          break;
+
+        case LOGIN:
+          if (!action.payload.userId) {
+            yield put(userActions.requestFailure('User ID is required'));
+            return;
+          }
+
+          response = yield call(api.user.login, action.payload.userId);
+          break;
+
+        default:
+          yield put(userActions.requestFailure('Something went wrong'));
+          return;
+      }
 
       if (!response.error) {
         yield put(

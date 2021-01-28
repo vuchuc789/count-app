@@ -1,8 +1,21 @@
 import { all, fork } from 'redux-saga/effects';
 import { watchLoginAgain, watchRegisterAndLogin } from './userSagas';
+import {
+  watchCreateTimekeeper,
+  watchDeleteTimekeeper,
+  watchGetAllTimekeepers,
+  watchUpdateTimekeeper,
+} from './timekeeperSagas';
 
 const rootSaga = function* () {
-  yield all([fork(watchRegisterAndLogin), fork(watchLoginAgain)]);
+  yield all([
+    fork(watchRegisterAndLogin),
+    fork(watchLoginAgain),
+    fork(watchCreateTimekeeper),
+    fork(watchGetAllTimekeepers),
+    fork(watchDeleteTimekeeper),
+    fork(watchUpdateTimekeeper),
+  ]);
 };
 
 export default rootSaga;
