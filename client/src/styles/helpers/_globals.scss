@@ -36,12 +36,20 @@ textarea {
     justify-content: space-around;
   }
 
+  &-jc-sb {
+    justify-content: space-between;
+  }
+
   &-ai-ct {
     align-items: center;
   }
 
   &-di-co {
     flex-direction: column;
+  }
+
+  &-no-wrap {
+    flex-wrap: nowrap;
   }
 }
 
@@ -83,10 +91,10 @@ textarea {
 
 @keyframes appear {
   0% {
-    opacity: 0%;
+    opacity: 0;
   }
   100% {
-    opacity: 100%;
+    opacity: 1;
   }
 }
 

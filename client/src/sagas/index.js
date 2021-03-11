@@ -5,6 +5,8 @@ import {
   watchDeleteTimekeeper,
   watchGetAllTimekeepers,
   watchUpdateTimekeeper,
+  watchGetTimekeeper,
+  watchGetMessage,
 } from './timekeeperSagas';
 
 const rootSaga = function* () {
@@ -15,6 +17,8 @@ const rootSaga = function* () {
     fork(watchGetAllTimekeepers),
     fork(watchDeleteTimekeeper),
     fork(watchUpdateTimekeeper),
+    fork(watchGetTimekeeper),
+    fork(watchGetMessage),
   ]);
 };
 

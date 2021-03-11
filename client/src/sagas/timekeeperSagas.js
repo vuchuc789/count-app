@@ -1,7 +1,15 @@
 import { call, put, select, takeEvery } from 'redux-saga/effects';
 import api from '../api';
-import { CREATE, DELETE, GET_ALL, UPDATE } from '../actions/actionTypes';
+import {
+  CREATE,
+  DELETE,
+  GET_ALL,
+  UPDATE,
+  GET,
+  GET_MESSAGE,
+} from '../actions/actionTypes';
 import timekeeperActions from '../actions/timekeeperActions';
+import timekeeperApi from '../api/timekeeperApi';
 
 function* createTimekeeper(action) {
   try {
@@ -151,4 +159,76 @@ function* updateTimekeeper(action) {
 
 export function* watchUpdateTimekeeper() {
   yield takeEvery(UPDATE, updateTimekeeper);
+}
+
+function* getTimekeeper(action) {
+  try {
+    const isGetting = yield select((state) => state.timekeeper.isGetting);
+
+    if (!isGetting) {
+      yield put(timekeeperActions.getRequested());
+
+      if (action.payload.id) {
+        const response = yield call(
+          timekeeperApi.getATimekeeper,
+          action.payload.id
+        );
+
+        if (!response.error) {
+          yield put(
+            timekeeperActions.getSuccess({
+              id: response._id,
+              title: response.title,
+              timestamp: response.timestamp,
+            })
+          );
+        } else {
+          yield put(timekeeperActions.getFailure());
+        }
+      } else {
+        yield put(timekeeperActions.getFailure());
+      }
+    } else {
+      yield put(timekeeperActions.getFailure());
+    }
+  } catch (error) {
+    yield put(timekeeperActions.getFailure());
+  }
+}
+
+export function* watchGetTimekeeper() {
+  yield takeEvery(GET, getTimekeeper);
+}
+
+function* getMessage(action) {
+  try {
+    const messageIsGetting = yield select(
+      (state) => state.timekeeper.messageIsGetting
+    );
+
+    if (!messageIsGetting) {
+      yield put(timekeeperActions.getMessageRequested());
+
+      const response = yield call(
+        timekeeperApi.getTimekeeperMessage,
+        action.payload.timekeeperId
+      );
+
+      if (!response.error) {
+        yield put(
+          timekeeperActions.getMessageSuccess({ message: response.message })
+        );
+      } else {
+        yield put(timekeeperActions.getMessageFailure(response.error));
+      }
+    } else {
+      yield put(timekeeperActions.getMessageFailure('Message is getting'));
+    }
+  } catch (error) {
+    yield put(timekeeperActions.getMessageFailure(error.message));
+  }
+}
+
+export function* watchGetMessage() {
+  yield takeEvery(GET_MESSAGE, getMessage);
 }

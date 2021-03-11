@@ -37,7 +37,8 @@ const App = () => {
           {userId ? <Dashboard /> : <Redirect to="/" />}
         </Route>
         <Route path="/timekeeper/:id" component={Timekeeper} />
-        <Route component={NotFound} />
+        <Route path="/notfound" component={NotFound} />
+        <Redirect to="/notfound" />
       </Switch>
     </Router>
   );

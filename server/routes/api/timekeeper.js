@@ -38,6 +38,10 @@ router.delete(
   paramsMiddleware.checkTimekeeperIdExistence,
   timekeeperController.deleteTimekeeper
 );
-router.get("/message/:id", timekeeperController.getMessage);
+router.get(
+  "/message/:id",
+  paramsMiddleware.checkTimekeeperIdExistence,
+  timekeeperController.getMessage
+);
 
 module.exports = router;

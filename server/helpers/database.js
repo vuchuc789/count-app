@@ -11,6 +11,6 @@ exports.connectToDatabase = async (mongoURI) => {
 
     console.log("MongoDB connected !!");
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };

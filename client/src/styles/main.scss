@@ -1,4 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700&family=Potta+One&display=swap');
+@font-face {
+  font-family: 'Montserrat';
+  src: url('./fonts/Montserrat-Regular.ttf');
+}
+@font-face {
+  font-family: 'Alloy Ink';
+  src: url('./fonts/AlloyInk-lgdWw.otf');
+}
 
 @import './helpers/variables';
 @import './helpers/mixins';
@@ -7,5 +14,4 @@
 // pages
 @import './components/dashboard';
 @import './components/login';
-@import './components/notFound';
 @import './components/timekeeper';

@@ -130,7 +130,7 @@ const Login = () => {
         </div>
       </div>
       <div
-        className={`spinner-background${
+        className={`spinner-background ${
           userLoading ? '' : 'spinner-invisible'
         }`}
       >

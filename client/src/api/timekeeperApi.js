@@ -47,6 +47,20 @@ const timekeeperApi = {
 
     return response.data;
   },
+  getATimekeeper: async (timekeeperId) => {
+    const response = await axios.get(
+      apiURL + `/api/timekeeper/${timekeeperId}`
+    );
+
+    return response.data;
+  },
+  getTimekeeperMessage: async (timekeeperId) => {
+    const response = await axios.get(
+      apiURL + `/api/timekeeper/message/${timekeeperId}`
+    );
+
+    return response.data;
+  },
 };
 
 export default timekeeperApi;

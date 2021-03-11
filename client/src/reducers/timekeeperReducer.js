@@ -12,6 +12,13 @@ import {
   UPDATE_REQUESTED,
   UPDATE_SUCCESS,
   UPDATE_FAILURE,
+  GET_REQUESTED,
+  GET_SUCCESS,
+  GET_FAILURE,
+  RESET_GET,
+  GET_MESSAGE_REQUESTED,
+  GET_MESSAGE_SUCCESS,
+  GET_MESSAGE_FAILURE,
 } from '../actions/actionTypes';
 
 const initialState = {
@@ -19,6 +26,15 @@ const initialState = {
   isGettingAll: false,
   isCreating: false,
   isUpdatingOrDeleting: false,
+  displayedTimekeeper: {
+    id: '',
+    title: '',
+    message: '',
+    timestamp: '',
+  },
+  isGetting: false,
+  getFailure: false,
+  messageIsGetting: false,
   error: '',
 };
 
@@ -96,6 +112,48 @@ const timekeeperReducer = (state = initialState, action) => {
       return {
         ...state,
         isUpdatingOrDeleting: false,
+        error: payload.error,
+      };
+    case GET_REQUESTED:
+      return {
+        ...state,
+        isGetting: true,
+      };
+    case GET_SUCCESS:
+      return {
+        ...state,
+        displayedTimekeeper: { ...state.displayedTimekeeper, ...payload },
+        isGetting: false,
+      };
+    case GET_FAILURE:
+      return {
+        ...state,
+        isGetting: false,
+        getFailure: true,
+      };
+    case RESET_GET:
+      return {
+        ...state,
+        getFailure: false,
+      };
+    case GET_MESSAGE_REQUESTED:
+      return {
+        ...state,
+        messageIsGetting: true,
+      };
+    case GET_MESSAGE_SUCCESS:
+      return {
+        ...state,
+        messageIsGetting: false,
+        displayedTimekeeper: {
+          ...state.displayedTimekeeper,
+          message: payload.message,
+        },
+      };
+    case GET_MESSAGE_FAILURE:
+      return {
+        ...state,
+        messageIsGetting: false,
         error: payload.error,
       };
     case CLEAR_TIMEKEEPER_ERROR:
