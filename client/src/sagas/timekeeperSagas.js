@@ -10,6 +10,7 @@ import {
 } from '../actions/actionTypes';
 import timekeeperActions from '../actions/timekeeperActions';
 import timekeeperApi from '../api/timekeeperApi';
+import IndexedDB from '../helpers/indexedDB';
 
 function* createTimekeeper(action) {
   try {
@@ -24,14 +25,19 @@ function* createTimekeeper(action) {
       );
 
       if (!response.error) {
-        yield put(
-          timekeeperActions.createdSuccess({
-            id: response._id,
-            title: response.title,
-            message: response.message,
-            timestamp: response.timestamp,
-          })
-        );
+        const responseTimekeeper = {
+          id: response._id,
+          title: response.title,
+          message: response.message,
+          timestamp: response.timestamp,
+        };
+        const db = new IndexedDB();
+
+        yield put(timekeeperActions.createdSuccess(responseTimekeeper));
+
+        if (db.isReady()) {
+          yield call(db.add, responseTimekeeper);
+        }
       } else {
         yield put(timekeeperActions.createdFailure(response.error));
       }
@@ -40,6 +46,7 @@ function* createTimekeeper(action) {
     }
   } catch (error) {
     yield put(timekeeperActions.createdFailure(error.message));
+    console.error(error);
   }
 }
 
@@ -57,13 +64,18 @@ function* getAllTimekeepers() {
       const response = yield call(api.timekeeper.getAllTimekeepers);
 
       if (!response.error) {
-        yield put(
-          timekeeperActions.getAllSuccess(
-            response.map(({ _id, title, message, timestamp }) => {
-              return { id: _id, title, message, timestamp };
-            })
-          )
+        const responseTimekeepers = response.map(
+          ({ _id, title, message, timestamp }) => {
+            return { id: _id, title, message, timestamp };
+          }
         );
+        const db = new IndexedDB();
+
+        yield put(timekeeperActions.getAllSuccess(responseTimekeepers));
+
+        if (db.isReady()) {
+          yield call(db.addAll, responseTimekeepers);
+        }
       } else {
         yield put(timekeeperActions.getAllFailure(response.error));
       }
@@ -71,8 +83,8 @@ function* getAllTimekeepers() {
       yield put(timekeeperActions.getAllFailure('Timekeepers are fetching'));
     }
   } catch (error) {
-    console.error(error);
     yield put(timekeeperActions.getAllFailure(error.message));
+    console.error(error);
   }
 }
 
@@ -95,7 +107,13 @@ function* deleteTimekeeper(action) {
       );
 
       if (!response.error) {
+        const db = new IndexedDB();
+
         yield put(timekeeperActions.deleteSuccess({ id: response._id }));
+
+        if (db.isReady()) {
+          yield call(db.delete, response._id);
+        }
       } else {
         yield put(timekeeperActions.deleteFailure(response.error));
       }
@@ -106,6 +124,7 @@ function* deleteTimekeeper(action) {
     }
   } catch (error) {
     yield put(timekeeperActions.deleteFailure(error.message));
+    console.error(error);
   }
 }
 
@@ -136,14 +155,19 @@ function* updateTimekeeper(action) {
       );
 
       if (!response.error) {
-        yield put(
-          timekeeperActions.updateSuccess({
-            id: response._id,
-            title: response.title,
-            message: response.message,
-            timestamp: response.timestamp,
-          })
-        );
+        const responseTimekeeper = {
+          id: response._id,
+          title: response.title,
+          message: response.message,
+          timestamp: response.timestamp,
+        };
+        const db = new IndexedDB();
+
+        yield put(timekeeperActions.updateSuccess(responseTimekeeper));
+
+        if (db.isReady()) {
+          yield call(db.add, responseTimekeeper);
+        }
       } else {
         yield put(timekeeperActions.updateFailure(response.error));
       }
@@ -154,6 +178,7 @@ function* updateTimekeeper(action) {
     }
   } catch (error) {
     yield put(timekeeperActions.updateFailure(error.message));
+    console.error(error);
   }
 }
 
@@ -166,33 +191,76 @@ function* getTimekeeper(action) {
     const isGetting = yield select((state) => state.timekeeper.isGetting);
 
     if (!isGetting) {
+      const db = new IndexedDB();
+      let isFailure = true;
+      let storedTimekeeper;
+
       yield put(timekeeperActions.getRequested());
 
-      if (action.payload.id) {
-        const response = yield call(
-          timekeeperApi.getATimekeeper,
-          action.payload.id
-        );
+      if (db.isReady()) {
+        storedTimekeeper = yield call(db.retrieve, action.payload.id);
 
-        if (!response.error) {
+        if (storedTimekeeper) {
           yield put(
             timekeeperActions.getSuccess({
-              id: response._id,
-              title: response.title,
-              timestamp: response.timestamp,
+              id: storedTimekeeper.id,
+              title: storedTimekeeper.title,
+              timestamp: storedTimekeeper.timestamp,
             })
           );
-        } else {
-          yield put(timekeeperActions.getFailure());
+
+          isFailure = false;
         }
-      } else {
+      }
+
+      const response = yield call(
+        timekeeperApi.getATimekeeper,
+        action.payload.id
+      );
+
+      if (!response.error) {
+        const responseTimekeeper = {
+          id: response._id,
+          title: response.title,
+          timestamp: response.timestamp,
+        };
+
+        if (!storedTimekeeper) {
+          yield put(timekeeperActions.getSuccess(responseTimekeeper));
+          isFailure = false;
+
+          db.add({
+            ...responseTimekeeper,
+            message: '',
+          });
+        } else {
+          if (
+            storedTimekeeper.id !== responseTimekeeper.id ||
+            storedTimekeeper.title !== responseTimekeeper.title ||
+            storedTimekeeper.timestamp !== responseTimekeeper.timestamp
+          ) {
+            yield put(timekeeperActions.getSuccess(responseTimekeeper));
+            isFailure = false;
+
+            db.add({
+              ...responseTimekeeper,
+              message: storedTimekeeper.message,
+            });
+          }
+        }
+      }
+
+      if (isFailure) {
         yield put(timekeeperActions.getFailure());
       }
     } else {
       yield put(timekeeperActions.getFailure());
     }
   } catch (error) {
-    yield put(timekeeperActions.getFailure());
+    if (error.message !== 'Network Error') {
+      yield put(timekeeperActions.getFailure());
+    }
+    console.error(error);
   }
 }
 
@@ -207,7 +275,23 @@ function* getMessage(action) {
     );
 
     if (!messageIsGetting) {
+      const db = new IndexedDB();
+      let isFailure = true;
+      let storedTimekeeper;
+
       yield put(timekeeperActions.getMessageRequested());
+
+      if (db.isReady()) {
+        storedTimekeeper = yield call(db.retrieve, action.payload.timekeeperId);
+
+        if (storedTimekeeper) {
+          timekeeperActions.getMessageSuccess({
+            message: storedTimekeeper.message,
+          });
+
+          isFailure = false;
+        }
+      }
 
       const response = yield call(
         timekeeperApi.getTimekeeperMessage,
@@ -215,17 +299,26 @@ function* getMessage(action) {
       );
 
       if (!response.error) {
-        yield put(
-          timekeeperActions.getMessageSuccess({ message: response.message })
-        );
-      } else {
-        yield put(timekeeperActions.getMessageFailure(response.error));
+        if (!storedTimekeeper) {
+          timekeeperActions.getMessageSuccess({ message: response.message });
+          isFailure = false;
+        } else {
+          if (response.message !== storedTimekeeper.message) {
+            timekeeperActions.getMessageSuccess({ message: response.message });
+            isFailure = false;
+          }
+        }
+      }
+
+      if (isFailure) {
+        yield put(timekeeperActions.getMessageFailure('Something went wrong'));
       }
     } else {
       yield put(timekeeperActions.getMessageFailure('Message is getting'));
     }
   } catch (error) {
     yield put(timekeeperActions.getMessageFailure(error.message));
+    console.error(error);
   }
 }
 

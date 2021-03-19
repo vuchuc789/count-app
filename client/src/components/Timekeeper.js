@@ -10,7 +10,7 @@ const Character = (props) => {
   const [lastDigit, currentDigit] = props.digits;
 
   return (
-    <div className="tk-char">
+    <div className="tk-char notranslate">
       <div>{lastDigit}</div>
       <div>{currentDigit}</div>
     </div>
@@ -33,6 +33,7 @@ const Timekeeper = () => {
   const [second, setSecond] = useState([0, 0]);
 
   const [timeoutId, setTimeoutId] = useState(0);
+  const [showTimekeeper, setShowTimekeeper] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
 
   const location = useLocation();
@@ -46,6 +47,7 @@ const Timekeeper = () => {
 
   const notFound = useSelector((state) => state.timekeeper.getFailure);
   const userId = useSelector((state) => state.user.userId);
+  const databaseInitiated = useSelector((state) => state.database.isInitiated);
 
   const calculateDifference = useCallback((timestamp) => {
     const timeAfterDelay = new Date(new Date().getTime() + 1000);
@@ -163,20 +165,26 @@ const Timekeeper = () => {
   ));
 
   useEffect(() => {
-    dispatch(timekeeperActions.get(location.pathname.split('/')[2]));
+    let interval = 0;
 
-    const interval = setInterval(() => {
-      setTicking((oldState) => oldState + 1);
-    }, 1000);
+    if (databaseInitiated) {
+      dispatch(timekeeperActions.get(location.pathname.split('/')[2]));
+
+      interval = setInterval(() => {
+        setTicking((oldState) => oldState + 1);
+      }, 1000);
+    }
 
     return () => {
-      clearInterval(interval);
+      if (interval > 0) {
+        clearInterval(interval);
+      }
 
       if (timeoutId > 0) {
         clearTimeout(timeoutId);
       }
     };
-  }, []);
+  }, [databaseInitiated]);
 
   useEffect(() => {
     if (notFound) {
@@ -234,6 +242,7 @@ const Timekeeper = () => {
     let timeoutToGetMessage;
     let timeoutToShowMessage;
     let timeoutToHideMessage;
+    let timeoutToShowTimekeeper;
 
     if (timekeeper.timestamp) {
       const timestampObject = new Date(timekeeper.timestamp);
@@ -247,6 +256,10 @@ const Timekeeper = () => {
         second: timestampObject.getSeconds(),
         millisecondEquals: timestampObject.getTime(),
       });
+
+      timeoutToShowTimekeeper = setTimeout(() => {
+        setShowTimekeeper(true);
+      }, 1000 - (new Date().getTime() % 1000));
 
       // get message at 5 minutes before timestamp
       const remainingTimeToShowMessage =
@@ -282,6 +295,10 @@ const Timekeeper = () => {
 
       if (timeoutToHideMessage) {
         clearTimeout(timeoutToHideMessage);
+      }
+
+      if (timeoutToShowTimekeeper) {
+        clearTimeout(timeoutToShowTimekeeper);
       }
     };
   }, [timekeeper.id]);
@@ -321,8 +338,8 @@ const Timekeeper = () => {
         )}
       </div>
       <div
-        className={`spinner-background ${
-          destinationTimestamp === null ? '' : 'spinner-invisible'
+        className={`spinner-background${
+          showTimekeeper ? ' spinner-invisible' : ''
         }`}
       >
         <div className="spinner"></div>

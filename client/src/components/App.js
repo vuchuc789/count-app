@@ -12,12 +12,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import userActions from '../actions/userActions';
 import timekeeperActions from '../actions/timekeeperActions';
+import IndexedDB from '../helpers/indexedDB';
+import databaseActions from '../actions/databaseActions';
 
 const App = () => {
   const userId = useSelector((state) => state.user.userId);
   const dispatch = useDispatch();
 
-  useEffect(() => {
+  useEffect(async () => {
+    const db = new IndexedDB();
+
+    await db.init();
+    dispatch(databaseActions.initiated());
     dispatch(userActions.loginAgain());
   }, []);
 

@@ -50,6 +50,7 @@ function* registerAndLogin(action) {
     }
   } catch (error) {
     yield put(userActions.requestFailure(error.message));
+    console.error(error);
   }
 }
 
@@ -86,6 +87,7 @@ function* loginAgain(action) {
     }
   } catch (error) {
     yield put(userActions.requestFailure(error.message));
+    console.error(error);
   }
 }
 

@@ -39,4 +39,7 @@ export const GET_MESSAGE_REQUESTED = 'GET_MESSAGE_REQUESTED';
 export const GET_MESSAGE_SUCCESS = 'GET_MESSAGE_SUCCESS';
 export const GET_MESSAGE_FAILURE = 'GET_MESSAGE_FAILURE';
 
+// Database's actions
+export const DATABASE_INITIATED = 'DATABASE_INITIATED';
+
 export default action;
